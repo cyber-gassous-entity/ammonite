@@ -1,0 +1,81 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMMONITE | PROJECT</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="scrollable project-page">
+
+    <!-- CUSTOM CURSOR -->
+    <div id="cursor">
+        <div class="cursor-tool"></div>
+    </div>
+
+    <!-- 4-CORNER NAVIGATION -->
+    <a href="index.html" class="nav-corner nav-tl logo inter hover-trig" id="logo-text">AMMONITE</a>
+    <a href="archive.html" class="nav-corner nav-tr hover-trig">ARCHIVE</a>
+    <a href="index.html" class="nav-corner nav-bl hover-trig">CONTACT</a>
+    <a href="about.html" class="nav-corner nav-br hover-trig">INFO</a>
+
+    <!-- MAIN CONTENT (Dynamically populated) -->
+    <main id="project-main-content">
+
+        <!-- DEFAULT PROJECT TEMPLATE -->
+        <div id="default-template">
+            <!-- PROJECT HERO -->
+            <section class="manifesto-section project-detail-hero">
+                <h1 id="p-name" class="inter"
+                    style="font-size: 3.5rem; margin: 0; line-height: 1; text-transform: uppercase;">LOADING...</h1>
+            </section>
+
+            <!-- METADATA -->
+            <section class="project-meta-grid">
+                <div>
+                    <div class="mono" style="opacity: 0.5;">ID</div>
+                    <div id="p-id" class="mono bold">---</div>
+                </div>
+                <div>
+                    <div class="mono" style="opacity: 0.5;">LOCATION</div>
+                    <div id="p-loc" class="mono bold">---</div>
+                </div>
+                <div>
+                    <div class="mono" style="opacity: 0.5;">YEAR</div>
+                    <div id="p-year" class="mono bold">---</div>
+                </div>
+                <div>
+                    <div class="mono" style="opacity: 0.5;">STATUS</div>
+                    <div id="p-status" class="mono bold">---</div>
+                </div>
+            </section>
+
+            <!-- CONTENT / IMAGES & TEXT -->
+            <section class="project-detail-content">
+                <div id="p-desc" class="project-description inter">
+                    LOADING DESCRIPTION...
+                </div>
+                <div id="p-gallery"></div>
+            </section>
+        </div>
+
+    </main>
+
+
+
+    <!-- LOGIC -->
+
+    <script src="project.js"></script>
+
+</body>
+
+</html>

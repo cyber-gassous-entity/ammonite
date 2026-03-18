@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AMMONITE | ARCHIVE</title>
+
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;700&family=Space+Mono:ital,wght@0,400;0,700;1,400&display=swap"
+        rel="stylesheet">
+
+    <!-- SWIPER CSS -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.css" />
+
+    <link rel="stylesheet" href="style.css">
+</head>
+
+<body class="scrollable"> <!-- Starting in default white mode (All Projects) -->
+
+    <!-- CUSTOM CURSOR -->
+    <div id="cursor">
+        <div class="cursor-tool"></div>
+    </div>
+
+    <!-- 4-CORNER NAVIGATION -->
+    <a href="index.html" class="nav-corner nav-tl logo inter hover-trig" id="logo-text">AMMONITE</a>
+    <a href="archive.html" class="nav-corner nav-tr hover-trig text-active">ARCHIVE</a>
+    <a href="index.html" class="nav-corner nav-bl hover-trig">CONTACT</a>
+    <a href="about.html" class="nav-corner nav-br hover-trig">INFO</a>
+
+    <!-- MAIN CONTENT -->
+    <main>
+
+        <div class="project-list">
+
+            <!-- MODE SWITCHER -->
+            <div id="mode-switcher">
+                <button id="btn-arch" class="mode-btn" data-category="arch">[ ARCH ]</button>
+                <button id="btn-design" class="mode-btn" data-category="design">[ DESIGN ]</button>
+            </div>
+            <!-- Header Row -->
+            <div class="row header-row mono">
+                <div class="col-id">ID</div>
+                <div class="col-name">TITLE</div>
+                <div class="col-meta">LOCATION</div>
+                <div class="col-meta">YEAR</div>
+                <div class="col-meta">TYPE</div>
+            </div>
+
+            <div id="mobile-swiper-container">
+                <div id="projects-container"></div>
+            </div>
+
+        </div>
+
+    </main>
+
+    <!-- PREVIEW IMAGE (Unified for Desktop Split & Mobile Sticky) -->
+    <div id="shared-preview"></div>
+
+
+
+    <!-- LOGIC -->
+    <!-- SWIPER JS -->
+    <script src="https://cdn.jsdelivr.net/npm/swiper@11/swiper-bundle.min.js"></script>
+    <script src="projects.js?v=2"></script>
+    <script src="archive.js?v=2"></script>
+</body>
+
+</html>

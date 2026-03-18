@@ -1,0 +1,7 @@
+NAME: AMMONITE.WORK
+LOCATION: WEB
+YEAR: 2025
+TYPE: DIGITAL
+CATEGORY: research
+IMAGES: 0
+DESCRIPTION: This is the main description paragraph. It sits below the main image. Ammonite works on the reality of built form. This text can be as long as you want.
