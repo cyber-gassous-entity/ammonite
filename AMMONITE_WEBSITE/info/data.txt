@@ -1,0 +1,43 @@
+// AMMONITE STUDIO | CENTRAL DATA ARCHIVE
+
+// 3D ASSET CONFIGURATION
+
+// Place .ply files in: AMMONITE_WEBSITE/info/scans/
+
+SCAN_FILE: contact_scan.ply
+
+// CORE STUDIO PROFILE
+
+ABOUT: Ammonite is a practice suspended between the geological slow-time of the Dolomites and the digital speed of Milan. We reject the confusion between Art and Design. Art asks questions; Design produces solutions.
+
+// PRIMARY CONTACT
+
+EMAIL: hello@ammonite.work
+
+// SOCIAL ARCHIVE
+
+INSTAGRAM_LINK: https://www.instagram.com/ammonite.work
+
+// OPERATIONAL HUBS
+
+// Use empty lines for internal line breaks. 
+// The site logic will convert these to commas for the contact footer.
+
+HQ_1_BODY: Via Roma 12
+
+
+
+Primiero, TN
+
+
+
+Italy
+HQ_2_BODY: Via Tortona 34
+
+
+
+Milano, MI
+
+
+
+Italy
