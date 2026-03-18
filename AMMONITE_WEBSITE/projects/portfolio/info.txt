@@ -1,7 +1,0 @@
-NAME: PORTFOLIO
-LOCATION: WORLD
-YEAR: 2026
-TYPE: PRINT
-CATEGORY: design
-IMAGES: 1
-DESCRIPTION: A placeholder for the Portfolio project.

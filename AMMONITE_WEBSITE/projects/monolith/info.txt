@@ -1,7 +1,0 @@
-NAME: MONOLITH
-LOCATION: NY
-YEAR: 2026
-TYPE: RESEARCH
-CATEGORY: arch
-IMAGES: 1
-DESCRIPTION: A test project for minimum viability.
