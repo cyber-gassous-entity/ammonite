@@ -339,85 +339,85 @@ main {
 
 /* --- 3. ARCHIVE PAGE --- */
 #mode-switcher {
-    display: flex;
-    gap: 0;
-    width: 100%;
-    padding: 0 var(--pad-x);
-    pointer-events: auto;
-    border-bottom: 1px solid var(--line);
-    background: transparent;
-}
-
-.mode-btn {
-    flex: 1;
-    /* Occupy half screen each */
-    font-family: var(--font-code);
-    font-size: 11px;
-    font-weight: bold;
-    padding: 12px 12px;
-    background: transparent;
-    color: var(--ink);
-    cursor: none;
-    transition: all 0.2s ease;
-    border: none;
-    border-right: 1px solid var(--line);
-}
-
-.mode-btn:last-child {
-    border-right: none;
-}
-
-.mode-btn:hover,
-.mode-btn.active {
-    opacity: 0.5;
-    /* Highlight active/hover without background fill or blue */
+    display: none !important;
 }
 
 .project-list {
     width: 100%;
+    padding-top: 0;
 }
 
-/* Left half */
+#mobile-swiper-container {
+    height: 100vh;
+    width: 100%;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 5;
+    mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+    -webkit-mask-image: linear-gradient(to bottom, transparent 0%, black 15%, black 85%, transparent 100%);
+}
 
+/* Swiper Content Rows */
 .project-row-container {
-    border-bottom: 1px solid var(--line);
+    border-bottom: none;
     cursor: none;
+    transition: opacity 0.3s ease;
 }
 
 .row {
-    display: grid;
-    grid-template-columns: 0.8fr 3fr 1.5fr 1fr 1fr;
-    padding: 8px var(--pad-x);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
     align-items: center;
-    transition: background 0.1s;
+    text-align: center;
+    width: 100%;
+    height: 20vh;
+    gap: 4px;
+    padding: var(--pad);
     position: relative;
     z-index: 10;
+    transition: background 0.1s;
 }
 
 .header-row {
-    font-size: 10px;
-    padding-bottom: 10px;
-    padding-top: 10px;
-    border-bottom: 1px solid var(--line);
+    display: none !important;
 }
 
 .project-row-container:hover .row {
-    /* Remove solid background to let the immersive image take focus */
-    opacity: 0.7;
+    opacity: 1;
+}
+
+/* Info Row Layout */
+.info-row {
+    display: flex;
+    gap: 15px;
+    justify-content: center;
+    align-items: center;
+}
+
+.hide-mobile {
+    display: inline-block;
 }
 
 /* Columns */
-.col-id {
-    opacity: 0.7;
+.col-id,
+.col-meta {
+    font-family: var(--font-code) !important;
+    font-weight: 400 !important;
+    font-size: 14px;
+    text-transform: uppercase;
+    display: inline-block;
+    margin: 0;
 }
 
 .col-name {
-    font-size: 1.4rem;
-    line-height: 0.9;
-}
-
-.col-meta {
-    opacity: 0.8;
+    font-family: var(--font-code) !important;
+    font-weight: 700 !important;
+    font-size: 14px;
+    text-transform: uppercase;
+    display: block;
+    margin: 0;
 }
 
 /* Filter display logic */
@@ -436,47 +436,67 @@ body.design-mode .category-arch {
     display: none;
 }
 
-/* Base row opacity for scrolling highlight effect */
-.project-row-container {
+/* Swiper active states */
+.swiper-slide {
+    height: auto !important;
+    opacity: 0.3;
     transition: opacity 0.3s ease;
 }
 
-/* Shared Preview Container (Immersive Background / Mobile Sticky) */
+.swiper-slide-active {
+    opacity: 1;
+}
+
+/* Shared Preview Container */
 #shared-preview {
+    opacity: 1; /* Always visible */
     position: fixed;
     top: 0;
     left: 0;
     width: 100vw;
     height: 100vh;
     z-index: 0;
-    /* Placed behind the content */
     background-color: var(--bg);
     background-size: cover;
     background-position: center;
-    transition: opacity 0.2s ease-out;
+    border: none;
+    transition: background-image 0.4s ease-out;
     pointer-events: none;
-    opacity: 0;
-    /* Stylize image to match page colors */
-    /* Removed global mix-blend-mode to allow mode-specific styling */
 }
 
-/* Default White Mode Hover: Raw Image */
-#shared-preview.active {
-    opacity: 1;
-    /* 100% unwashed intensity */
+/* Opaline Glass Effect */
+#shared-preview::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    backdrop-filter: none;
+    -webkit-backdrop-filter: none;
+    background: transparent;
+    transition: background 0.4s ease, backdrop-filter 0.4s ease, -webkit-backdrop-filter 0.4s ease;
 }
 
-/* Arch Mode Hover: Black & White */
-body.arch-mode #shared-preview.active {
+body.arch-mode #shared-preview::after {
+    backdrop-filter: blur(8px) saturate(110%);
+    -webkit-backdrop-filter: blur(8px) saturate(110%);
+    background: rgba(0, 0, 0, 0.2);
+}
+
+body.design-mode #shared-preview::after {
+    backdrop-filter: blur(8px) saturate(110%);
+    -webkit-backdrop-filter: blur(8px) saturate(110%);
+    background: rgba(204, 0, 0, 0.2);
+}
+
+body.arch-mode #shared-preview {
     filter: grayscale(100%);
-    opacity: 1;
 }
 
-/* Design Mode Hover: Red Duotone */
-body.design-mode #shared-preview.active {
+body.design-mode #shared-preview {
     filter: grayscale(100%);
     mix-blend-mode: multiply;
-    opacity: 1;
 }
 
 /* --- 4. ABOUT PAGE --- */
@@ -576,95 +596,25 @@ body.design-mode #shared-preview.active {
         font-size: 1.2rem;
     }
 
-    /* Archive */
-    .project-list {
-        width: 100%;
-        padding-top: calc(var(--logo-size) + var(--pad) * 2);
-    }
-
-    #mobile-swiper-container {
-        height: calc(100vh - (var(--logo-size) + var(--pad) * 3));
-        /* Fill remaining screen */
-        width: 100%;
-    }
-
-    /* Keep the row for text, but stack them */
-    .row {
-        grid-template-columns: 1fr;
-        gap: 4px;
-        padding: 15px 10px;
-        /* Align with nav buttons padding: 10px */
-        padding-bottom: 25px;
-        /* space between text and image */
-        position: relative;
-        z-index: 10;
-        border-bottom: none;
-    }
-
-    /* Swiper handles active state */
-    .swiper-slide {
-        height: auto !important;
-        /* Let content dictate height, Swiper handles vertical offset */
-        opacity: 0.3;
-        transition: opacity 0.3s ease;
-    }
-
-    .swiper-slide-active {
-        opacity: 1;
-    }
-
-    .header-row,
+    /* Archive overrides for mobile */
     #cursor {
         display: none !important;
-    }
-
-    #shared-preview {
-        opacity: 1;
-        /* Always visible on mobile */
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        z-index: 0;
-        /* behind everything */
-        background-color: var(--bg);
-        border: none;
-        transition: background-image 0.4s ease-out;
     }
 
     #mode-switcher {
         display: none !important;
     }
 
-    .mode-btn {
-        flex: none;
-        padding: 0;
-        border: none !important;
-        font-size: 10px;
-        opacity: 0.5;
-    }
-
     main {
         margin-top: 0;
+    }
+
+    .hide-mobile {
+        display: none !important;
     }
 
     /* Restore default cursor on mobile */
     * {
         cursor: auto;
-    }
-
-    .col-id,
-    .col-meta {
-        font-size: 10px;
-        display: inline-block;
-        margin-right: 10px;
-        /* Removed opacity for stark contrast */
-    }
-
-    .col-name {
-        font-size: 1.2rem;
-        display: block;
-        margin-bottom: 4px;
     }
 }

@@ -21,52 +21,59 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* --- AMMONITE <-> AMMO SCRAMBLE LOGIC --- */
     const logoEl = document.getElementById('logo-text');
-    let scrambleInterval = null;
+    const modeEl = document.getElementById('mode-text');
+    let logoScrambleInterval = null;
+    let modeScrambleInterval = null;
     let mainLoopInterval = null;
     let lockLogoState = null;
 
-    if (logoEl) {
+    if (logoEl || modeEl) {
         const chars = '!<>-/_[]{}01*';
         const totalScrambleFrames = 18;
         let isAmmonite = true;
 
-        function scrambleText(target, onComplete = null) {
+        function scrambleText(el, target, onComplete = null) {
+            if (!el) return;
             let frame = 0;
-            if (scrambleInterval) clearInterval(scrambleInterval);
-
-            scrambleInterval = setInterval(() => {
-                logoEl.innerText = target.split("").map((letter, index) => {
+            let interval = setInterval(() => {
+                el.innerText = target.split("").map((letter, index) => {
                     const settleFrame = (index + 1) * (totalScrambleFrames / target.length);
                     if (frame > settleFrame) return target[index];
                     return chars[Math.floor(Math.random() * chars.length)];
                 }).join("");
 
                 if (frame >= totalScrambleFrames) {
-                    clearInterval(scrambleInterval);
-                    logoEl.innerText = target;
+                    clearInterval(interval);
+                    el.innerText = target;
                     if (onComplete) onComplete();
                 }
                 frame++;
             }, 70);
+            return interval;
         }
 
-        lockLogoState = function (target) {
+        lockLogoState = function (targetLogo, targetMode) {
             if (mainLoopInterval) {
                 clearInterval(mainLoopInterval);
                 mainLoopInterval = null;
             }
-            if (scrambleInterval) {
-                clearInterval(scrambleInterval);
-                scrambleInterval = null;
-            }
-            scrambleText(target, () => {
-                logoEl.innerText = target;
-            });
+            if (logoScrambleInterval) clearInterval(logoScrambleInterval);
+            if (modeScrambleInterval) clearInterval(modeScrambleInterval);
+            
+            if (logoEl) scrambleText(logoEl, targetLogo, () => { logoEl.innerText = targetLogo; });
+            if (modeEl) scrambleText(modeEl, targetMode, () => { modeEl.innerText = targetMode; });
         };
 
         mainLoopInterval = setInterval(() => {
             isAmmonite = !isAmmonite;
-            scrambleText(isAmmonite ? 'AMMONITE' : 'AMMO');
+            if (logoEl) {
+                if (logoScrambleInterval) clearInterval(logoScrambleInterval);
+                logoScrambleInterval = scrambleText(logoEl, isAmmonite ? 'AMMONITE' : 'AMMO');
+            }
+            if (modeEl) {
+                if (modeScrambleInterval) clearInterval(modeScrambleInterval);
+                modeScrambleInterval = scrambleText(modeEl, isAmmonite ? 'ARCHITECTURE' : 'DESIGN');
+            }
         }, 4000);
     }
 
@@ -133,9 +140,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
             // Check mode styling based on category
             if (meta.CATEGORY === 'arch') {
-                if (lockLogoState) lockLogoState('AMMONITE');
+                if (lockLogoState) lockLogoState('AMMONITE', 'ARCHITECTURE');
             } else if (meta.CATEGORY === 'design' || meta.CATEGORY === 'photo' || meta.CATEGORY === 'research') {
-                if (lockLogoState) lockLogoState('AMMO');
+                if (lockLogoState) lockLogoState('AMMO', 'DESIGN');
             }
 
             const gallery = document.getElementById('p-gallery');

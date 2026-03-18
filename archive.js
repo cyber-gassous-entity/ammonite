@@ -17,57 +17,62 @@ document.addEventListener('DOMContentLoaded', () => {
 
     /* --- AMMONITE <-> AMMO SCRAMBLE LOGIC --- */
     const logoEl = document.getElementById('logo-text');
-    let scrambleInterval = null;
+    const modeEl = document.getElementById('mode-text');
+    let logoScrambleInterval = null;
+    let modeScrambleInterval = null;
     let mainLoopInterval = null;
     let isAmmonite = true;
     const chars = '!<>-/_[]{}01*';
     const totalScrambleFrames = 18;
 
-    function scrambleText(target, onComplete = null) {
-        if (!logoEl) return;
+    function scrambleText(el, target, onComplete = null) {
+        if (!el) return null;
         let frame = 0;
-        if (scrambleInterval) clearInterval(scrambleInterval);
-
-        scrambleInterval = setInterval(() => {
-            logoEl.innerText = target.split("").map((letter, index) => {
+        let interval = setInterval(() => {
+            el.innerText = target.split("").map((letter, index) => {
                 const settleFrame = (index + 1) * (totalScrambleFrames / target.length);
                 if (frame > settleFrame) return target[index];
                 return chars[Math.floor(Math.random() * chars.length)];
             }).join("");
 
             if (frame >= totalScrambleFrames) {
-                clearInterval(scrambleInterval);
-                logoEl.innerText = target;
+                clearInterval(interval);
+                el.innerText = target;
                 if (onComplete) onComplete();
             }
             frame++;
         }, 70);
+        return interval;
     }
 
     function startScrambleCycle() {
         if (mainLoopInterval) clearInterval(mainLoopInterval);
         mainLoopInterval = setInterval(() => {
             isAmmonite = !isAmmonite;
-            scrambleText(isAmmonite ? 'AMMONITE' : 'AMMO');
+            if (logoEl) {
+                if (logoScrambleInterval) clearInterval(logoScrambleInterval);
+                logoScrambleInterval = scrambleText(logoEl, isAmmonite ? 'AMMONITE' : 'AMMO');
+            }
+            if (modeEl) {
+                if (modeScrambleInterval) clearInterval(modeScrambleInterval);
+                modeScrambleInterval = scrambleText(modeEl, isAmmonite ? 'ARCHITECTURE' : 'DESIGN');
+            }
         }, 4000);
     }
 
-    function lockLogoState(target) {
+    function lockLogoState(targetLogo, targetMode) {
         if (mainLoopInterval) {
             clearInterval(mainLoopInterval);
             mainLoopInterval = null;
         }
-        if (scrambleInterval) {
-            clearInterval(scrambleInterval);
-            scrambleInterval = null;
-        }
-        // Force text directly after final tiny scramble to guarantee it isn't overridden
-        scrambleText(target, () => {
-            logoEl.innerText = target;
-        });
+        if (logoScrambleInterval) clearInterval(logoScrambleInterval);
+        if (modeScrambleInterval) clearInterval(modeScrambleInterval);
+        
+        if (logoEl) scrambleText(logoEl, targetLogo, () => { logoEl.innerText = targetLogo; });
+        if (modeEl) scrambleText(modeEl, targetMode, () => { modeEl.innerText = targetMode; });
     }
 
-    if (logoEl && !document.body.classList.contains('arch-mode') && !document.body.classList.contains('design-mode')) {
+    if ((logoEl || modeEl) && !document.body.classList.contains('arch-mode') && !document.body.classList.contains('design-mode')) {
         startScrambleCycle();
     }
 
@@ -103,16 +108,41 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Logo click resets everything
-    if (logoEl) {
-        logoEl.addEventListener('click', (e) => {
-            const hasMode = document.body.classList.contains('arch-mode') || document.body.classList.contains('design-mode');
-            if (hasMode) {
-                e.preventDefault();
-                typeButtons.forEach(b => b.classList.remove('active'));
+    // Mode text click cycles through modes
+    if (modeEl) {
+        modeEl.addEventListener('click', (e) => {
+            e.preventDefault();
+            const isArch = document.body.classList.contains('arch-mode');
+            const isDesign = document.body.classList.contains('design-mode');
+
+            if (!isArch && !isDesign) {
+                // Default -> Arch Mode
+                document.body.classList.add('arch-mode');
+                lockLogoState('AMMONITE', 'ARCHITECTURE');
+                if (globalProjectsCache && globalProjectsCache.length > 0) {
+                    renderProjects(globalProjectsCache.filter(p => {
+                        const cat = (p.CATEGORY || 'arch').toLowerCase();
+                        return cat.includes('arch');
+                    }));
+                }
+            } else if (isArch) {
+                // Arch Mode -> Design Mode
                 document.body.classList.remove('arch-mode');
+                document.body.classList.add('design-mode');
+                lockLogoState('AMMO', 'DESIGN');
+                if (globalProjectsCache && globalProjectsCache.length > 0) {
+                    renderProjects(globalProjectsCache.filter(p => {
+                        const cat = (p.CATEGORY || 'arch').toLowerCase();
+                        return cat.includes('design') || cat.includes('photo') || cat.includes('art') || cat.includes('research');
+                    }));
+                }
+            } else {
+                // Design Mode -> Default
                 document.body.classList.remove('design-mode');
                 startScrambleCycle();
+                if (globalProjectsCache && globalProjectsCache.length > 0) {
+                    renderProjects(globalProjectsCache);
+                }
             }
         });
     }
@@ -121,8 +151,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const projectsContainer = document.getElementById('projects-container');
     const sharedPreview = document.getElementById('shared-preview');
     let swiperInstance = null;
-    let mobileObserver = null;
-    const isMobile = window.innerWidth <= 768;
+    let globalProjectsCache = [];
 
     async function loadProjects() {
         const projectFolders = window.AMMONITE_PROJECTS || [];
@@ -153,32 +182,51 @@ document.addEventListener('DOMContentLoaded', () => {
             } catch (e) { console.error("Error loading project: ", folder, e); }
         }
 
+        globalProjectsCache = projects;
         renderProjects(projects);
     }
 
     function renderProjects(projects) {
         if (!projectsContainer) return;
+
+        // Destroy Swiper cleanly BEFORE removing DOM elements
+        if (swiperInstance) {
+            swiperInstance.destroy(true, true);
+            swiperInstance = null;
+        }
+
         projectsContainer.innerHTML = '';
 
         // Sort descending by YEAR then ID
         projects.sort((a, b) => (b.YEAR || '0000').localeCompare(a.YEAR || '0000'));
 
+        const preloadCache = [];
+
         projects.forEach((p, index) => {
             const catClass = p.CATEGORY ? `category-${p.CATEGORY.toLowerCase()}` : 'category-arch';
             const imgPath = p.IMG_MAIN ? `projects/${p.FOLDER}/${p.IMG_MAIN}` : '';
+
+            // Preload image to prevent white flash
+            if (imgPath) {
+                const img = new Image();
+                img.src = imgPath;
+                preloadCache.push(img);
+            }
 
             // Assign a fake ID if missing since they don't seem to have one in info.txt
             const pId = p.ID || `AMM-${(index + 1).toString().padStart(2, '0')}`;
 
             // Layout
             const html = `
-                <div class="project-row-container ${catClass} ${isMobile ? 'swiper-slide' : ''}" data-img="${imgPath}">
-                    <a href="project.html?p=${p.FOLDER}" class="row" style="display: grid; color: inherit;">
-                        <div class="col-id mono">${pId}</div>
+                <div class="project-row-container ${catClass} swiper-slide" data-img="${imgPath}">
+                    <a href="project.html?p=${p.FOLDER}" class="row" style="color: inherit;">
                         <div class="col-name inter bold">${p.NAME || 'UNTITLED'}</div>
-                        <div class="col-meta mono">${p.LOCATION || '---'}</div>
-                        <div class="col-meta mono">${p.YEAR || '---'}</div>
-                        <div class="col-meta mono">${p.TYPE || '---'}</div>
+                        <div class="info-row mono">
+                            <span class="col-id hide-mobile">${pId}</span>
+                            <span class="col-meta">${p.LOCATION || '---'}</span>
+                            <span class="col-meta hide-mobile">${p.YEAR || '---'}</span>
+                            <span class="col-meta hide-mobile">${p.TYPE || '---'}</span>
+                        </div>
                     </a>
                 </div>
             `;
@@ -194,29 +242,23 @@ document.addEventListener('DOMContentLoaded', () => {
     function rebindEvents() {
         const rows = document.querySelectorAll('.project-row-container');
 
-        if (swiperInstance) {
-            swiperInstance.destroy(true, true);
-            swiperInstance = null;
-        }
-
         const swiperContainer = document.getElementById('mobile-swiper-container');
 
-        if (isMobile && typeof Swiper !== 'undefined') {
-            // Apply Swiper classes dynamically only for mobile
+        if (typeof Swiper !== 'undefined') {
+            // Apply Swiper classes dynamically
             if (swiperContainer && projectsContainer) {
                 swiperContainer.classList.add('swiper');
                 projectsContainer.classList.add('swiper-wrapper');
             }
 
-            // Initialize Swiper for mobile infinite scrolling
+            // Initialize Swiper for infinite scrolling
             swiperInstance = new Swiper('#mobile-swiper-container', {
                 direction: 'vertical',
                 loop: true,
-                centeredSlides: false, // Start from the top
-                slidesPerView: 'auto',
-                speed: 600, // Slightly slower fluid speed
-                touchRatio: 1.5, // Make dragging feel more responsive
-                resistanceRatio: 0.65, // Add mild resistance on drag limits
+                mousewheel: true, // Allow scrolling with mouse wheel on desktop
+                centeredSlides: true, 
+                slidesPerView: 'auto', // Allow elements above and below to peek
+                speed: 600, // Smooth transition speed
                 on: {
                     slideChangeTransitionStart: function () {
                         // Regular loop triggers on active index
@@ -240,29 +282,7 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             });
-        } else {
-            // Desktop: Clean up Swiper DOM additions to prevent flexbox layouts from breaking the grid
-            if (swiperContainer && projectsContainer) {
-                swiperContainer.classList.remove('swiper');
-                projectsContainer.classList.remove('swiper-wrapper');
-            }
         }
-
-        rows.forEach(row => {
-            const imgPath = row.getAttribute('data-img');
-            const innerRow = row.querySelector('.row'); // Target the actual <a> tag for hover
-
-            if (!isMobile && imgPath && innerRow) {
-                innerRow.addEventListener('mouseenter', () => {
-                    sharedPreview.style.backgroundImage = `url('${imgPath}')`;
-                    sharedPreview.classList.add('active');
-                });
-
-                innerRow.addEventListener('mouseleave', () => {
-                    sharedPreview.classList.remove('active');
-                });
-            }
-        });
 
         rebindHover();
     }
